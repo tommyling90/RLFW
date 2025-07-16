@@ -43,21 +43,41 @@ def run_results():
     if latest_file:
         with open(latest_file, "rb") as f:
             cp = pickle.load(f)
-        game_idx = cp['game_idx']
         run_idx = cp['run_idx']
         rng_state = cp['rng_state']
     else:
-        game_idx = run_idx = 0
+        run_idx = 0
 
     np.random.set_state(rng_state) if rng_state is not None else np.random.seed(defaults['seed'])
-    ctx = PickleContext(game_idx, run_idx, folder)
+    ctx = PickleContext(run_idx, folder)
 
-    for g in range(game_idx, len(games)):
-        game = games[f'game{g+1}']
-        matrix = np.array(game['matrix'])
-        n_actions = len(matrix[0])
-        matrices = generate_n_player_diag(player, n_actions, matrix) if is_diagonal(matrix) else generate_n_player(
-            player, n_actions, matrix)
-        Execute(runs, horizon, player, [None] * player, game['name'], n_actions).get_one_game_result(
-            matrices, game['algos'], ctx, g, 'normal', game['noise'][0])
-        ctx.reset_after_game()
+    for r in range(run_idx, runs):
+        all_games_metrics_for_run = []
+        for g in range(0, len(games)):
+            game = games[f'game{g + 1}']
+            matrix = np.array(game['matrix'])
+            n_actions = len(matrix[0])
+            matrices = generate_n_player_diag(player, n_actions, matrix) if is_diagonal(matrix) else generate_n_player(
+                player, n_actions, matrix)
+
+            matrices_norm = [normalizeMatrix(mat, 0) for mat in matrices]
+
+            regrets, rewards, plays, exploration_list, title = (
+                Execute(runs, horizon, player, [None] * player, game['name'], n_actions).run_one_game(matrices_norm, game['algos'], 'normal', game['noise'][0], ctx))
+
+            for agent_id in range(player):
+                metrics_dict = {
+                    "play_time": plays[agent_id].tolist(),
+                    "reward_time": rewards[agent_id].tolist(),
+                    "regret_time": regrets[agent_id].tolist(),
+                    "exploration_time": exploration_list[agent_id].tolist(),
+                }
+                all_games_metrics_for_run.append(flatten_metrics(
+                    title=title,
+                    player=f"agent_{agent_id}",
+                    instance=r,
+                    n_actions=n_actions,
+                    metrics_dict=metrics_dict
+                ))
+
+        save_pickle(ctx, r, all_games_metrics_for_run)

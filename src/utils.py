@@ -36,17 +36,17 @@ def sort_metric_columns(df):
 
 def find_latest_checkpoint(pkl_folder):
     latest_cp = None
-    latest_key = (-1, -1, -1)  # (game, run, iter)
+    latest_run_idx = -1
 
-    pattern = re.compile(r"cp_game(\d+)_run(\d+)\.pkl")
+    pattern = re.compile(r"cp_run(\d+)\.pkl")
 
     if not os.path.exists(pkl_folder): return None
     for fname in os.listdir(pkl_folder):
         match = pattern.match(fname)
         if match:
-            g, r = map(int, match.groups())
-            if (g, r) > latest_key:
-                latest_key = (g, r)
+            run_idx = int(match.group(1))
+            if run_idx > latest_run_idx:
+                latest_run_idx = run_idx
                 latest_cp = fname
 
     if latest_cp:
@@ -62,34 +62,16 @@ def save_pickle_atomic(path, obj):
         pickle.dump(obj, f)
     os.replace(tmp_path, path)
 
-def save_pickle(ctx, g, r, plays, exploration_list, regrets, rewards, title, n_actions):
-    delta = []
-    for agent_id in range(plays.shape[0]):
-        metrics_dict = {
-            "play_time": plays[agent_id].tolist(),
-            "reward_time": rewards[agent_id].tolist(),
-            "regret_time": regrets[agent_id].tolist(),
-            "exploration_time": exploration_list[agent_id].tolist(),
-        }
-
-        delta.append(flatten_metrics(
-            title=title,
-            player=f"agent_{agent_id}",
-            instance=f"instance_{r}",
-            n_actions=n_actions,
-            metrics_dict=metrics_dict
-        ))
-
+def save_pickle(ctx, r, all_games_metrics_for_run):
     cp = {
-        "game_idx": g,
         'run_idx': r+1,
-        'metrics': delta,
+        'metrics': all_games_metrics_for_run,
         'rng_state': np.random.get_state(),
     }
-    pkl_file = f"{ctx.cp_file}/pkl/cp_game{g+1}_run{r}.pkl"
+    pkl_file = f"{ctx.cp_file}/pkl/cp_run{r}.pkl"
     os.makedirs(os.path.dirname(pkl_file), exist_ok=True)
     save_pickle_atomic(pkl_file, cp)
-    print(f"📝 Saved checkpoint: game={g+1}, run={r}")
+    print(f"📝 Saved checkpoint: run={r}")
 
 def aggregate_metrics_from_pkl(path):
     merged_rows = defaultdict(dict)

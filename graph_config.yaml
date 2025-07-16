@@ -1,5 +1,5 @@
 defaults:
-  graph_folder: "Figures/SM0.1-ComparaisonUCBTS_tauLog-500"
+  graph_folder: "Figures/SM0.1-ComparaisonUCBTS_tauLog_changeLoops"
 
 games:
 #  game1:
