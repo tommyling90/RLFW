@@ -1,0 +1,92 @@
+defaults:
+  graph_folder: "Figures/SM0.1-ComparaisonUCBTS_tauLog-500"
+
+games:
+#  game1:
+#    name: "PG_WP"
+#    cumul_y: "regret"
+#    noise: ["1.0"]
+#    algos:
+#      - ["UCB", "TS", "UCB"]
+#      - ["TS", "TS", "UCB"]
+#      - ["UCB", "UCB", "UCB"]
+#  game2:
+#    name: "PG_WP"
+#    cumul_y: "regret"
+#    noise: ["0.0"]
+#    algos:
+#      - [ "KLUCB", "KLUCB", "UCB" ]
+#      - [ "UCB", "TS", "UCB" ]
+#  game3:
+#    name: "PG_WP"
+#    cumul_y: "regret"
+#    noise: ["0.0", "0.1", "1.0"]
+#    algos:
+#      - [ "UCB", "TS", "UCB" ]
+#  game4:
+#    name: "PG_WP"
+#    cumul_y: "regret"
+#    noise: ["0.1"]
+#    algos:
+#      - [ "UCB", "KLUCB", "UCB" ]
+#      - [ "TS", "TS", "UCB" ]
+#  game1:
+#    name: "PG_WP"
+#    cumul_y: "regret"
+#    noise: ["0.0", "0.1", "1.0"]
+#    algos:
+#      - ["UCB", "UCB"]
+#  game2:
+#    name: "PG_WP"
+#    cumul_y: "regret"
+#    noise: [ "0.0", "0.1", "1.0" ]
+#    algos:
+#      - [ "TS", "TS" ]
+  game1:
+    name: "PG_WP"
+    cumul_y: "regret"
+    noise: [ "0.0", "0.1", "1.0" ]
+    algos:
+      - [ "SoftMax", "SoftMax" ]
+  game4:
+    name: "PG_WP"
+    cumul_y: "regret"
+    noise: ["1.0"]
+    algos:
+      - [ "SoftMax", "TS" ]
+      - [ "SoftMax", "UCB" ]
+      - [ "SoftMax", "SoftMax" ]
+  game5:
+    name: "PG_WP"
+    cumul_y: "regret"
+    noise: ["0.1"]
+    algos:
+      - [ "SoftMax", "TS" ]
+      - [ "SoftMax", "UCB" ]
+      - [ "SoftMax", "SoftMax" ]
+  game6:
+    name: "PG_WP"
+    cumul_y: "regret"
+    noise: [ "0.0" ]
+    algos:
+      - [ "SoftMax", "TS" ]
+      - [ "SoftMax", "UCB" ]
+      - [ "SoftMax", "SoftMax" ]
+  game7:
+    name: "PG_WP"
+    cumul_y: "prop"
+    noise: ["0.1"]
+    algos:
+      - [ "SoftMax", "SoftMax" ]
+#  game8:
+#    name: "PG_WP"
+#    cumul_y: "prop"
+#    noise: [ "0.1" ]
+#    algos:
+#      - [ "TS", "TS" ]
+#  game9:
+#    name: "PG_WP"
+#    cumul_y: "prop"
+#    noise: [ "0.1" ]
+#    algos:
+#      - [ "UCB", "UCB" ]

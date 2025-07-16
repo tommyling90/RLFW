@@ -1,0 +1,360 @@
+---
+defaults:
+  player: 2
+  runs: 10
+  horizon: 500
+  seed: 43
+  save_folder: "Figures/SM0.1-ComparaisonUCBTS_tauLog-500"
+
+games:
+#  game1:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.0]
+#    algos: ["UCB", "UCB", "UCB"]
+#  game2:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.1]
+#    algos: ["UCB", "UCB", "UCB"]
+#  game3:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 1.0]
+#    algos: ["UCB", "UCB", "UCB"]
+#  game4:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.0]
+#    algos: ["KLUCB", "KLUCB", "UCB"]
+#  game5:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.1]
+#    algos: ["KLUCB", "KLUCB", "UCB"]
+#  game6:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 1.0]
+#    algos: ["KLUCB", "KLUCB", "UCB"]
+#  game7:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.0]
+#    algos: ["UCB", "KLUCB", "UCB"]
+#  game8:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.1]
+#    algos: [ "UCB", "KLUCB", "UCB"]
+#  game9:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 1.0]
+#    algos: [ "UCB", "KLUCB", "UCB"]
+#  game10:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.0]
+#    algos: [ "UCB", "TS", "UCB"]
+#  game11:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.1]
+#    algos: [ "UCB", "TS", "UCB"]
+#  game12:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 1.0]
+#    algos: [ "UCB", "TS", "UCB"]
+#  game13:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.0]
+#    algos: [ "TS", "TS", "UCB"]
+#  game14:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.1]
+#    algos: [ "TS", "TS", "UCB"]
+#  game15:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 1.0]
+#    algos: [ "TS", "TS", "UCB"]
+#  game1:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.0]
+#    algos: ["UCB", "UCB"]
+#  game2:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.1]
+#    algos: ["UCB", "UCB"]
+#  game3:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 1.0]
+#    algos: ["UCB", "UCB"]
+#  game4:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.0]
+#    algos: ["KLUCB", "KLUCB"]
+#  game5:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.1]
+#    algos: ["KLUCB", "KLUCB"]
+#  game6:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 1.0]
+#    algos: ["KLUCB", "KLUCB"]
+#  game7:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.0]
+#    algos: ["UCB", "KLUCB"]
+#  game8:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.1]
+#    algos: [ "UCB", "KLUCB"]
+#  game9:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 1.0]
+#    algos: [ "UCB", "KLUCB" ]
+#  game10:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.0]
+#    algos: [ "UCB", "TS" ]
+#  game11:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.1]
+#    algos: [ "UCB", "TS" ]
+#  game12:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 1.0]
+#    algos: [ "UCB", "TS" ]
+#  game4:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.0]
+#    algos: [ "TS", "TS" ]
+#  game5:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 0.1]
+#    algos: [ "TS", "TS" ]
+#  game6:
+#    name: "PG_WP"
+#    matrix:
+#      - [1, 0.2, 0]
+#      - [0.2, 0.8, 0.2]
+#      - [0, 0.2, 1]
+#    noise:
+#      - [0.0, 1.0]
+#    algos: [ "TS", "TS" ]
+  game1:
+    name: "PG_WP"
+    matrix:
+      - [ 1, 0.2, 0 ]
+      - [ 0.2, 0.8, 0.2 ]
+      - [ 0, 0.2, 1 ]
+    noise:
+      - [ 0.0, 0.0 ]
+    algos: [ "SoftMax", "SoftMax" ]
+  game2:
+    name: "PG_WP"
+    matrix:
+      - [ 1, 0.2, 0 ]
+      - [ 0.2, 0.8, 0.2 ]
+      - [ 0, 0.2, 1 ]
+    noise:
+      - [ 0.0, 0.1 ]
+    algos: [ "SoftMax", "SoftMax" ]
+  game3:
+    name: "PG_WP"
+    matrix:
+      - [ 1, 0.2, 0 ]
+      - [ 0.2, 0.8, 0.2 ]
+      - [ 0, 0.2, 1 ]
+    noise:
+      - [ 0.0, 1.0 ]
+    algos: [ "SoftMax", "SoftMax" ]
+  game4:
+    name: "PG_WP"
+    matrix:
+      - [ 1, 0.2, 0 ]
+      - [ 0.2, 0.8, 0.2 ]
+      - [ 0, 0.2, 1 ]
+    noise:
+      - [ 0.0, 0.0 ]
+    algos: [ "SoftMax", "TS" ]
+  game5:
+    name: "PG_WP"
+    matrix:
+      - [ 1, 0.2, 0 ]
+      - [ 0.2, 0.8, 0.2 ]
+      - [ 0, 0.2, 1 ]
+    noise:
+      - [ 0.0, 0.1 ]
+    algos: [ "SoftMax", "TS" ]
+  game6:
+    name: "PG_WP"
+    matrix:
+      - [ 1, 0.2, 0 ]
+      - [ 0.2, 0.8, 0.2 ]
+      - [ 0, 0.2, 1 ]
+    noise:
+      - [ 0.0, 1.0 ]
+    algos: [ "SoftMax", "TS" ]
+  game7:
+    name: "PG_WP"
+    matrix:
+      - [ 1, 0.2, 0 ]
+      - [ 0.2, 0.8, 0.2 ]
+      - [ 0, 0.2, 1 ]
+    noise:
+      - [ 0.0, 0.0 ]
+    algos: [ "SoftMax", "UCB" ]
+  game8:
+    name: "PG_WP"
+    matrix:
+      - [ 1, 0.2, 0 ]
+      - [ 0.2, 0.8, 0.2 ]
+      - [ 0, 0.2, 1 ]
+    noise:
+      - [ 0.0, 0.1 ]
+    algos: [ "SoftMax", "UCB" ]
+  game9:
+    name: "PG_WP"
+    matrix:
+      - [ 1, 0.2, 0 ]
+      - [ 0.2, 0.8, 0.2 ]
+      - [ 0, 0.2, 1 ]
+    noise:
+      - [ 0.0, 1.0 ]
+    algos: [ "SoftMax", "UCB" ]

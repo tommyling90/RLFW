@@ -1,0 +1,169 @@
+defaults:
+  horizon: 500
+  player: 2
+  runs: 10
+  save_folder: Figures/SM0.1-ComparaisonUCBTS_tauLog-500
+  seed: 43
+games:
+  game1:
+    algos:
+    - SoftMax
+    - SoftMax
+    matrix:
+    - - 1
+      - 0.2
+      - 0
+    - - 0.2
+      - 0.8
+      - 0.2
+    - - 0
+      - 0.2
+      - 1
+    name: PG_WP
+    noise:
+    - - 0.0
+      - 0.0
+  game2:
+    algos:
+    - SoftMax
+    - SoftMax
+    matrix:
+    - - 1
+      - 0.2
+      - 0
+    - - 0.2
+      - 0.8
+      - 0.2
+    - - 0
+      - 0.2
+      - 1
+    name: PG_WP
+    noise:
+    - - 0.0
+      - 0.1
+  game3:
+    algos:
+    - SoftMax
+    - SoftMax
+    matrix:
+    - - 1
+      - 0.2
+      - 0
+    - - 0.2
+      - 0.8
+      - 0.2
+    - - 0
+      - 0.2
+      - 1
+    name: PG_WP
+    noise:
+    - - 0.0
+      - 1.0
+  game4:
+    algos:
+    - SoftMax
+    - TS
+    matrix:
+    - - 1
+      - 0.2
+      - 0
+    - - 0.2
+      - 0.8
+      - 0.2
+    - - 0
+      - 0.2
+      - 1
+    name: PG_WP
+    noise:
+    - - 0.0
+      - 0.0
+  game5:
+    algos:
+    - SoftMax
+    - TS
+    matrix:
+    - - 1
+      - 0.2
+      - 0
+    - - 0.2
+      - 0.8
+      - 0.2
+    - - 0
+      - 0.2
+      - 1
+    name: PG_WP
+    noise:
+    - - 0.0
+      - 0.1
+  game6:
+    algos:
+    - SoftMax
+    - TS
+    matrix:
+    - - 1
+      - 0.2
+      - 0
+    - - 0.2
+      - 0.8
+      - 0.2
+    - - 0
+      - 0.2
+      - 1
+    name: PG_WP
+    noise:
+    - - 0.0
+      - 1.0
+  game7:
+    algos:
+    - SoftMax
+    - UCB
+    matrix:
+    - - 1
+      - 0.2
+      - 0
+    - - 0.2
+      - 0.8
+      - 0.2
+    - - 0
+      - 0.2
+      - 1
+    name: PG_WP
+    noise:
+    - - 0.0
+      - 0.0
+  game8:
+    algos:
+    - SoftMax
+    - UCB
+    matrix:
+    - - 1
+      - 0.2
+      - 0
+    - - 0.2
+      - 0.8
+      - 0.2
+    - - 0
+      - 0.2
+      - 1
+    name: PG_WP
+    noise:
+    - - 0.0
+      - 0.1
+  game9:
+    algos:
+    - SoftMax
+    - UCB
+    matrix:
+    - - 1
+      - 0.2
+      - 0
+    - - 0.2
+      - 0.8
+      - 0.2
+    - - 0
+      - 0.2
+      - 1
+    name: PG_WP
+    noise:
+    - - 0.0
+      - 1.0
