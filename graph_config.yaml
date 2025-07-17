@@ -1,5 +1,6 @@
 defaults:
-  graph_folder: "Figures/SM0.1-ComparaisonUCBTS_tauLog_changeLoops"
+  graph_folder: "Figures/SM0.1-ComparaisonUCBTS_tauLog_100r500h"
+  n_actions: 3
 
 games:
 #  game1:

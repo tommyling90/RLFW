@@ -3,7 +3,6 @@ import sys
 
 from execute import Execute
 from utils import *
-from pickleContext import PickleContext
 
 with open("../config.yaml", "r") as f:
     config = yaml.safe_load(f)
@@ -49,7 +48,6 @@ def run_results():
         run_idx = 0
 
     np.random.set_state(rng_state) if rng_state is not None else np.random.seed(defaults['seed'])
-    ctx = PickleContext(run_idx, folder)
 
     for r in range(run_idx, runs):
         all_games_metrics_for_run = []
@@ -63,7 +61,7 @@ def run_results():
             matrices_norm = [normalizeMatrix(mat, 0) for mat in matrices]
 
             regrets, rewards, plays, exploration_list, title = (
-                Execute(runs, horizon, player, [None] * player, game['name'], n_actions).run_one_game(matrices_norm, game['algos'], 'normal', game['noise'][0], ctx))
+                Execute(runs, horizon, player, [None] * player, game['name'], n_actions).run_one_game(matrices_norm, game['algos'], 'normal', game['noise'][0]))
 
             for agent_id in range(player):
                 metrics_dict = {
@@ -80,4 +78,5 @@ def run_results():
                     metrics_dict=metrics_dict
                 ))
 
-        save_pickle(ctx, r, all_games_metrics_for_run)
+        save_pickle(folder, r, all_games_metrics_for_run)
+        aggregate_metrics_from_single_pkl(f"{folder}/pkl/cp_run{r}.pkl")

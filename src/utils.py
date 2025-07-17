@@ -62,45 +62,56 @@ def save_pickle_atomic(path, obj):
         pickle.dump(obj, f)
     os.replace(tmp_path, path)
 
-def save_pickle(ctx, r, all_games_metrics_for_run):
+def save_pickle(folder, r, all_games_metrics_for_run):
     cp = {
         'run_idx': r+1,
         'metrics': all_games_metrics_for_run,
         'rng_state': np.random.get_state(),
     }
-    pkl_file = f"{ctx.cp_file}/pkl/cp_run{r}.pkl"
+    pkl_file = f"{folder}/pkl/cp_run{r}.pkl"
     os.makedirs(os.path.dirname(pkl_file), exist_ok=True)
     save_pickle_atomic(pkl_file, cp)
     print(f"📝 Saved checkpoint: run={r}")
 
-def aggregate_metrics_from_pkl(path):
-    merged_rows = defaultdict(dict)
+def aggregate_metrics_from_single_pkl(file_path):
+    with open(file_path, "rb") as f:
+        cp = pickle.load(f)
+    rows_by_time = defaultdict(lambda: defaultdict(dict))
 
-    for fname in sorted(os.listdir(path)):
-        if fname.endswith(".pkl") and fname.startswith("cp_"):
-            with open(os.path.join(path, fname), "rb") as f:
-                cp = pickle.load(f)
+    pattern = re.compile(r"([a-zA-Z_]+)(\d+)$")
 
-                for entry in cp["metrics"]:
-                    key = (entry["title"], entry["player"], entry["instance"])
+    for entry in cp["metrics"]:
+        title = entry["title"]
+        player = entry["player"]
+        instance = entry["instance"]
+        n_actions = entry["n_actions"]
 
-                    if not merged_rows[key]:
-                        merged_rows[key]["title"] = entry["title"]
-                        merged_rows[key]["player"] = entry["player"]
-                        merged_rows[key]["instance"] = entry["instance"]
-                        merged_rows[key]["n_actions"] = entry["n_actions"]
+        for key, value in entry.items():
+            match = pattern.match(key)
+            if match:
+                metric_prefix, t_str = match.groups()
+                t = int(t_str)
+                base_metric = metric_prefix.replace("_time", "").rstrip("_")  # clean up "reward_time" → "reward"
+                colname = f"{base_metric}_{player}"
+                rows_by_time[(title, instance, t)][colname] = value
 
-                    for k, v in entry.items():
-                        if k.startswith(("play_time", "reward_time", "regret_time", "exploration_time")):
-                            merged_rows[key].setdefault(k, v)
+    tall_rows = []
+    for (title, instance, t), metric_dict in sorted(rows_by_time.items()):
+        row = {"title": title, "n_actions": n_actions, "time_step": t,}
+        row.update(metric_dict)
+        tall_rows.append(row)
 
-    all_rows = list(merged_rows.values())
-    df = pd.DataFrame(all_rows)
-    df = sort_metric_columns(df)
+    df = pd.DataFrame(tall_rows)
+    df = df.sort_values(["title"])
 
-    parent_folder = os.path.dirname(path.rstrip("/"))
-    df.to_csv(os.path.join(parent_folder, "output.csv"), index=False)
-    print(f"✅ Saved aggregated CSV.")
+    fname = os.path.basename(file_path)
+    run_id = fname.removesuffix(".pkl").replace("cp_", "")
+    output_dir = os.path.join(os.path.dirname(file_path), "..", "output")
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, f"{run_id}.csv")
+
+    df.to_csv(output_path, index=False)
+    print(f"📄 Saved clean tall-wide CSV: {output_path}")
 
 def generate_n_player_PD(n, reward_matrix):
     # 2 pcq trahir vs trahir pas

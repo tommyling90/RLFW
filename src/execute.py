@@ -4,7 +4,6 @@ from agentSpace import AgentSpace
 from learningAlgo import LearningAlgo
 from agent import Agent
 from environment import Environnement
-from utils import normalizeMatrix, save_pickle
 
 class Execute:
     def __init__(self, n_instance, T, n_agents, const, title, n_actions):
@@ -15,7 +14,7 @@ class Execute:
         self.title = title
         self.n_actions = n_actions
 
-    def run_one_game(self, matrices, algo, noise_dist, noise_params, ctx):
+    def run_one_game(self, matrices, algo, noise_dist, noise_params):
         env = Environnement(matrices, noise_dist, noise_params)
         for agent in range(0, self.n_agents):
             a_space = AgentSpace(self.n_actions)

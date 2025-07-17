@@ -104,16 +104,16 @@ plt.rcParams.update({
     "legend.fontsize": 8
 })
 
-def generate_fig(cumul_y, algos, noise, name, folder):
+def generate_fig(cumul_y, algos, noise, name, n_actions, folder):
     games, games_result = [], []
     for algo in algos:
         for n in noise:
             algoCombo = "×".join(algo)
             games.append(f"{algoCombo}_0.0_{n}_{name}")
     for g in games:
-        res = runStats(f"{folder}/output.csv", g)
+        res, subDir = runStats(f"{folder}/output/", g, n_actions)
         games_result.append(res)
-    newDir = f"{folder}/{cumul_y}"
+    newDir = f"{folder}/{cumul_y}/{subDir}"
     os.makedirs(newDir, exist_ok=True)
     if cumul_y == 'regret':
         plot_results(games_result, newDir, 'algos' if len(algos) > 1 else 'noise')
