@@ -4,6 +4,7 @@
 
 This project is a modular training framework for reinforcement learning and implements several RL algorithms, matrix games, agents, and the environment where the games are carried out.
 It demonstrates simulation-based methods and scalable code structure.
+This framework is designed with flexibility in mind, enabling the agility often needed in scientific research workflows — such as running experiments and generating figures or statistics under varying conditions, including different noise levels, algorithmic configurations, and other custom modifications.
 Some important features include game configuration by user, extending the games to multiple players with tensor, checkpointing, figure configuration by user, and others.
 
 ## Installation
@@ -104,7 +105,7 @@ Notice that
 
 Each checkpoint is saved as a separate `.pkl` file named: `cp_run{r}.pkl`
 
-#### 📊 Saving CSV
+#### Saving CSV
 
 Metrics of each checkpoint are stored in each `.pkl` file and then converted into csv at each checkpoint using the function `aggregate_metrics_from_single_pkl`.
 
