@@ -44,6 +44,7 @@ def run_results():
             cp = pickle.load(f)
         run_idx = cp['run_idx']
         rng_state = cp['rng_state']
+        recover_last_csv(f"{folder}/pkl/")
     else:
         run_idx = 0
 

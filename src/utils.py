@@ -113,6 +113,10 @@ def aggregate_metrics_from_single_pkl(file_path):
     df.to_csv(output_path, index=False)
     print(f"📄 Saved clean tall-wide CSV: {output_path}")
 
+def recover_last_csv(pkl_folder):
+    latest_pkl_path = find_latest_checkpoint(pkl_folder)
+    aggregate_metrics_from_single_pkl(latest_pkl_path)
+
 def generate_n_player_PD(n, reward_matrix):
     # 2 pcq trahir vs trahir pas
     shape = (2,) * n
