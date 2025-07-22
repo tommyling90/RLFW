@@ -16,6 +16,33 @@ def generate_figures():
         cumul_y = val['cumul_y']
         generate_fig(cumul_y, val['algos'], val['noise'], val['name'], fig_defaults['n_actions'], f"{fig_root}/{fig_defaults['graph_folder']}")
 
+def prune_pkls(pkl_folder):
+    pkl_files = list(Path(pkl_folder).glob("cp_run*.pkl"))
+    if not pkl_files:
+        print("[Prune] Pkl folder empty.")
+        return
+
+    run_indices = []
+    pattern = re.compile(r"cp_run(\d+)\.pkl")
+    for f in pkl_files:
+        match = pattern.match(f.name)
+        if match:
+            run_indices.append((int(match.group(1)), f))
+
+    if len(run_indices) <= 1:
+        print("[Prune] Must have the latest pkl file. Cannot delete.")
+        return
+
+    run_indices.sort()
+    *to_delete, last = run_indices
+    for _, f in to_delete:
+        try:
+            f.unlink()
+            print(f"[Prune] Deleted: {f}")
+        except Exception as e:
+            print(f"[Prune] Failed to delete: {e}")
+    print(f"[Prune] Kept latest: {last[1]}")
+
 def main():
     parser = argparse.ArgumentParser(
         description="RL Framework CLI"
@@ -31,11 +58,19 @@ def main():
         "generate_figures", help="Generate plots from a YAML figure config"
     )
 
+    # Command 3: prune_pkls
+    parser_prune = subparsers.add_parser(
+        "prune_pkls", help="Deletes all pkl files except for the last one"
+    )
+    parser_prune.add_argument("--path", "-p", required=True, help="Path to pkl folder")
+
     args = parser.parse_args()
     if args.command == "run_results":
         run_results()
     elif args.command == "generate_figures":
         generate_figures()
+    elif args.command == "prune_pkls":
+        prune_pkls(args.path)
 
 if __name__ == "__main__":
     main()

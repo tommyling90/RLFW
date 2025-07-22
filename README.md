@@ -30,6 +30,7 @@ pip install -r ./requirements.txt
 ### 🎮 CLI options
 1. `run_results` (no args; generate `.pkl` files. Can interrupt at any moment)
 2. `generate_figures` (no args; generate figures. Can run at any moment as long as `.csv` files are available)
+3. `prune_pkls` (arg: --path, need to give the relative path to the pkl folder containing `.pkl`s to delete; deletes the `.pkl` files except for the last one. Use when `.pkl` files or `pkl` folder get too large. Only the last `.pkl` is kept to resume)
 
 ## Documentation
 
