@@ -23,12 +23,13 @@ pip install -r ./requirements.txt
 ## Use example
 
 1. Configure the files `config.yaml` and `graph_config.yaml` (see description below and the files for reference)
-2. # TODO - command line
-3. Go to `main.py`. If user wishes to generate the results and the figures in one go, just run this file.
-3. Or else, comment out the code from where the program loads the `graph_config.yaml` file.
-4. User can interrupt the experiments at any moment. The results are saved in `pkl` files. When the user resumes, the experiment will pick up where it was left off.
-5. If user wishes to only generate figures, comment out the code above where the program loads the `graph_config.yaml` file.
-6. In `graph_config.yaml` user can choose a different folder than the folder in `config.yaml` to generate the figures from.
+2. Use command line tools to run the experiments and print the results. See available commands below.
+3. User can interrupt the experiments at any moment. The results are saved in `pkl` files. When the user resumes, the experiment will pick up where it was left off.
+4. Notice that in `graph_config.yaml` user can specify a different folder than the folder in `config.yaml` to generate the figures from (hence, `generate_figures` is completely separate from `run_results`).
+
+### 🎮 CLI options
+1. `run_results` (no args; generate `.pkl` files. Can interrupt at any moment)
+2. `generate_figures` (no args; generate figures. Can run at any moment as long as `.csv` files are available)
 
 ## Documentation
 
@@ -130,6 +131,7 @@ Furthermore, after interrupting and resuming, since the csv data has been record
         ├── config.yaml  # A copy of config.yaml as reference to the configurations experimented with
         ├── output/      # Folder for csv results of the experiment
             ├── run1.csv # Csv results of run1 (ditto for run2/run3...etc.)
+├── main.py              # Entry file
 ├── config.yaml          # Original config.yaml that the user should provide
 ├── graph_config.yaml    # Original graph_config.yaml that the user should provide for graph generation
 ├── README.md            # This file

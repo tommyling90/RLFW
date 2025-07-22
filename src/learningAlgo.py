@@ -1,5 +1,6 @@
 import numpy as np
-from agentSpace import AgentSpace
+
+from src.agentSpace import AgentSpace
 
 class LearningAlgo:
     def __init__(self, constant, algo_name, a_space: AgentSpace, noise_param):

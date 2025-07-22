@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
-from utils import parse_string
-from runStats import runStats
+from src.utils import parse_string
+from src.runStats import runStats
 
 sns.set_theme(style="whitegrid", palette="colorblind")
 sns.despine(trim=True)

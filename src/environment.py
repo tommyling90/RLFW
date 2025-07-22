@@ -1,6 +1,6 @@
 import numpy as np
 
-from agent import Agent
+from src.agent import Agent
 
 class Environnement:
     def __init__(self, matrices, noise_dist, noise_params):

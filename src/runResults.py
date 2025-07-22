@@ -1,10 +1,13 @@
 import yaml
 import sys
+from pathlib import Path
 
-from execute import Execute
-from utils import *
+from src.execute import Execute
+from src.utils import *
 
-with open("../config.yaml", "r") as f:
+root = Path(__file__).resolve().parent.parent
+config_path = root/"config.yaml"
+with open(config_path, "r") as f:
     config = yaml.safe_load(f)
 
 defaults = config['defaults']
@@ -13,7 +16,7 @@ games = config['games']
 runs = defaults['runs']
 horizon = defaults['horizon']
 player = defaults['player']
-folder = f"../{defaults['save_folder']}"
+folder = f"{root}/{defaults['save_folder']}"
 
 def run_results():
     if os.path.isdir(folder):

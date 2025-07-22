@@ -1,9 +1,9 @@
 import numpy as np
 
-from agentSpace import AgentSpace
-from learningAlgo import LearningAlgo
-from agent import Agent
-from environment import Environnement
+from src.agentSpace import AgentSpace
+from src.learningAlgo import LearningAlgo
+from src.agent import Agent
+from src.environment import Environnement
 
 class Execute:
     def __init__(self, n_instance, T, n_agents, const, title, n_actions):
