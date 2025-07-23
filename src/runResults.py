@@ -6,22 +6,28 @@ from src.execute import Execute
 from src.utils import *
 
 root = Path(__file__).resolve().parent.parent
-config_path = root/"config.yaml"
-with open(config_path, "r") as f:
-    config = yaml.safe_load(f)
 
-defaults = config['defaults']
-games = config['games']
+def open_config(config_path):
+    with open(config_path, "r") as f:
+        config = yaml.safe_load(f)
 
-runs = defaults['runs']
-horizon = defaults['horizon']
-player = defaults['player']
-folder = f"{root}/{defaults['save_folder']}"
+    defaults = config['defaults']
+    games = config['games']
+
+    horizon = defaults['horizon']
+    runs = defaults['runs']
+    player = defaults['player']
+    seed = defaults["seed"]
+    folder = f"{root}/{defaults['save_folder']}"
+    return games, horizon, runs, player, seed, folder, config
 
 def run_results():
+    config_path = root / "config.yaml"
+    games, horizon, runs, player, seed, folder, config = open_config(config_path)
+
     if os.path.isdir(folder):
         choice = input("⚠️ Folder already exists.\n"
-               "If you're continuing an experiment that was interrupted, press Y to continue.\n"
+               "If you're continuing an experiment that was interrupted or running more runs, press Y to continue.\n"
                "Otherwise press Q to quit and rename the folder in config.yaml.\n"
                "[Y/Q]").strip().upper()
         if choice == "Y":
@@ -51,7 +57,7 @@ def run_results():
     else:
         run_idx = 0
 
-    np.random.set_state(rng_state) if rng_state is not None else np.random.seed(defaults['seed'])
+    np.random.set_state(rng_state) if rng_state is not None else np.random.seed(seed)
 
     for r in range(run_idx, runs):
         all_games_metrics_for_run = []

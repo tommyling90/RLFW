@@ -43,6 +43,17 @@ def prune_pkls(pkl_folder):
             print(f"[Prune] Failed to delete: {e}")
     print(f"[Prune] Kept latest: {last[1]}")
 
+def add_runs(n):
+    with open('config.yaml', "r") as f:
+        config = yaml.safe_load(f)
+    runs = config['defaults']['runs']
+    new_runs = runs + int(n)
+    config['defaults']['runs'] = new_runs
+    with open('config.yaml', "w") as f:
+        yaml.safe_dump(config, f)
+    print(f"[Config] Updated runs from {runs} to {new_runs}")
+    return config
+
 def main():
     parser = argparse.ArgumentParser(
         description="RL Framework CLI"
@@ -64,6 +75,12 @@ def main():
     )
     parser_prune.add_argument("--path", "-p", required=True, help="Path to pkl folder")
 
+    # Command 4: add_runs
+    parser_add_runs = subparsers.add_parser(
+        "add_runs", help="Add more runs into the experiments"
+    )
+    parser_add_runs.add_argument("--n_runs", required=True, help="Number of runs to add")
+
     args = parser.parse_args()
     if args.command == "run_results":
         run_results()
@@ -71,6 +88,8 @@ def main():
         generate_figures()
     elif args.command == "prune_pkls":
         prune_pkls(args.path)
+    elif args.command == "add_runs":
+        add_runs(args.n_runs)
 
 if __name__ == "__main__":
     main()

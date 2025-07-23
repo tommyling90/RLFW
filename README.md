@@ -29,8 +29,9 @@ pip install -r ./requirements.txt
 
 ### 🎮 CLI options
 1. `run_results` (no args; generate `.pkl` files. Can interrupt at any moment)
-2. `generate_figures` (no args; generate figures. Can run at any moment as long as `.csv` files are available)
+2. `generate_figures` (no args; generate figures. Can run at any moment as long as `.csv` files are present)
 3. `prune_pkls` (arg: --path, need to give the relative path to the pkl folder containing `.pkl`s to delete; deletes the `.pkl` files except for the last one. Use when `.pkl` files or `pkl` folder get too large. Only the last `.pkl` is kept to resume)
+4. `add_runs` (arg: --n_runs, number of runs to add; adds more runs to the experiment in the `config.yaml` file)
 
 ## Documentation
 
