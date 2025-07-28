@@ -17,42 +17,75 @@ def generate_figures():
         generate_fig(cumul_y, val['algos'], val['noise'], val['name'], fig_defaults['n_actions'], f"{fig_root}/{fig_defaults['graph_folder']}")
 
 def prune_pkls(pkl_folder):
-    pkl_files = list(Path(pkl_folder).glob("cp_run*.pkl"))
-    if not pkl_files:
-        print("[Prune] Pkl folder empty.")
-        return
+    choice = input("⚠️ You're going to delete pkl files.\n"
+                   "If you're certain that you won't need them anymore, for example, you won't be extending horizon, press Y to delete.\n"
+                   "Otherwise press Q to quit and rename the folder in config.yaml.\n"
+                   "[Y/Q]").strip().upper()
+    if choice == "Y":
+        print("✅ Deleting...")
 
-    run_indices = []
-    pattern = re.compile(r"cp_run(\d+)\.pkl")
-    for f in pkl_files:
-        match = pattern.match(f.name)
-        if match:
-            run_indices.append((int(match.group(1)), f))
+        pkl_files = list(Path(pkl_folder).glob("cp_run*.pkl"))
+        if not pkl_files:
+            print("[Prune] Either wrong folder or pkl folder empty.")
+            return
 
-    if len(run_indices) <= 1:
-        print("[Prune] Must have the latest pkl file. Cannot delete.")
-        return
+        run_indices = []
+        pattern = re.compile(r"cp_run(\d+)\.pkl")
+        for f in pkl_files:
+            match = pattern.match(f.name)
+            if match:
+                run_indices.append((int(match.group(1)), f))
 
-    run_indices.sort()
-    *to_delete, last = run_indices
-    for _, f in to_delete:
-        try:
-            f.unlink()
-            print(f"[Prune] Deleted: {f}")
-        except Exception as e:
-            print(f"[Prune] Failed to delete: {e}")
-    print(f"[Prune] Kept latest: {last[1]}")
+        if len(run_indices) <= 1:
+            print("[Prune] Must have the latest pkl file. Cannot delete.")
+            return
 
-def add_runs(n):
+        run_indices.sort()
+        *to_delete, last = run_indices
+        for _, f in to_delete:
+            try:
+                f.unlink()
+                print(f"[Prune] Deleted: {f}")
+            except Exception as e:
+                print(f"[Prune] Failed to delete: {e}")
+        print(f"[Prune] Kept latest: {last[1]}")
+
+    elif choice == "Q":
+        print("❌ Exiting.")
+        sys.exit(0)
+    else:
+        print("❗ Invalid input. Exiting.")
+        sys.exit(1)
+
+def add(param, n):
     with open('config.yaml', "r") as f:
         config = yaml.safe_load(f)
-    runs = config['defaults']['runs']
-    new_runs = runs + int(n)
-    config['defaults']['runs'] = new_runs
+    if param == 'runs':
+        i = config['defaults']['runs']
+        new_i = i + int(n)
+        config['defaults']['runs'] = new_i
+    elif param == 'horizon':
+        i = config['defaults']['horizon']
+        new_i = i + int(n)
+        config['defaults']['horizon'] = new_i
     with open('config.yaml', "w") as f:
         yaml.safe_dump(config, f)
-    print(f"[Config] Updated runs from {runs} to {new_runs}")
+    print(f"[Config] Updated {param} from {i} to {new_i}")
     return config
+
+def add_horizon(n):
+    with open('config.yaml', "r") as f:
+        config = yaml.safe_load(f)
+    folder = config['defaults']['save_folder']
+    runs = config['defaults']['runs']
+    horizon = config['defaults']['horizon']
+    csv_files = list(Path(f'{folder}/output').glob("run*.csv"))
+    with open(f'{folder}/output/run{runs-1}.csv', "r") as f:
+        lines = sum(1 for _ in f) - 1
+    if Path(folder) / "output" / f"run{runs-1}.csv" not in csv_files or lines is not horizon:
+        print("‼️Experiment not complete. Can extend horizon only to a complete experiment.")
+        return
+    add('horizon', n)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -81,6 +114,12 @@ def main():
     )
     parser_add_runs.add_argument("--n_runs", required=True, help="Number of runs to add")
 
+    # Command 5: add_horizon
+    parser_add_horizon = subparsers.add_parser(
+        "add_horizon", help="Add more time steps into the experiments"
+    )
+    parser_add_horizon.add_argument("--n_horizon", required=True, help="Number of runs to add")
+
     args = parser.parse_args()
     if args.command == "run_results":
         run_results()
@@ -89,7 +128,9 @@ def main():
     elif args.command == "prune_pkls":
         prune_pkls(args.path)
     elif args.command == "add_runs":
-        add_runs(args.n_runs)
+        add('runs', args.n_runs)
+    elif args.command == "add_horizon":
+        add_horizon(args.n_horizon)
 
 if __name__ == "__main__":
     main()
