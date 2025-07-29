@@ -1,10 +1,10 @@
 ---
 defaults:
   player: 2
-  runs: 10
+  runs: 100
   horizon: 500
   seed: 43
-  save_folder: "Figures/SM0.1-ComparaisonUCBTS_tauLog-500"
+  save_folder: "Figures/SM0.1-ComparaisonUCBTS_tauLog_100r500h"
 
 games:
 #  game1:

@@ -1,7 +1,7 @@
 import numpy as np
 
-from agentSpace import AgentSpace
-from learningAlgo import LearningAlgo
+from src.agentSpace import AgentSpace
+from src.learningAlgo import LearningAlgo
 
 class Agent:
     def __init__(self, a_space: AgentSpace, algo):

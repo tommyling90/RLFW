@@ -1,25 +1,42 @@
 import yaml
 import sys
+from pathlib import Path
 
-from execute import Execute
-from utils import *
-from pickleContext import PickleContext
+from src.execute import Execute
+from src.utils import *
+from src.environment import Environnement
 
-with open("../config.yaml", "r") as f:
-    config = yaml.safe_load(f)
+root = Path(__file__).resolve().parent.parent
+LAST_ACTIVE_RUN = Path("last_active_run.txt")
 
-defaults = config['defaults']
-games = config['games']
+def get_last_active_run():
+    try:
+        with open("last_active_run.txt", "r") as f:
+            return int(f.read().strip()) - 1
+    except FileNotFoundError:
+        return None
 
-runs = defaults['runs']
-horizon = defaults['horizon']
-player = defaults['player']
-folder = f"../{defaults['save_folder']}"
+def open_config(config_path):
+    with open(config_path, "r") as f:
+        config = yaml.safe_load(f)
+
+    defaults = config['defaults']
+    games = config['games']
+
+    horizon = defaults['horizon']
+    runs = defaults['runs']
+    player = defaults['player']
+    seed = defaults["seed"]
+    folder = f"{root}/{defaults['save_folder']}"
+    return games, horizon, runs, player, seed, folder, config
 
 def run_results():
+    config_path = root / "config.yaml"
+    games, horizon, runs, player, seed, folder, config = open_config(config_path)
+
     if os.path.isdir(folder):
         choice = input("⚠️ Folder already exists.\n"
-               "If you're continuing an experiment that was interrupted, press Y to continue.\n"
+               "If you're continuing an experiment that was interrupted or running more runs, press Y to continue.\n"
                "Otherwise press Q to quit and rename the folder in config.yaml.\n"
                "[Y/Q]").strip().upper()
         if choice == "Y":
@@ -43,21 +60,79 @@ def run_results():
     if latest_file:
         with open(latest_file, "rb") as f:
             cp = pickle.load(f)
-        game_idx = cp['game_idx']
-        run_idx = cp['run_idx']
         rng_state = cp['rng_state']
+
+    np.random.set_state(rng_state) if rng_state is not None else np.random.seed(seed)
+
+    last_run_id = get_last_active_run()
+    if last_run_id is not None:
+        print(f"Regenerating CSV for run {last_run_id} before resuming...")
+        recover_last_csv(f"{folder}/pkl/", last_run_id)
     else:
-        game_idx = run_idx = 0
+        print("No previous run to recover.")
 
-    np.random.set_state(rng_state) if rng_state is not None else np.random.seed(defaults['seed'])
-    ctx = PickleContext(game_idx, run_idx, folder)
+    for r in range(runs):
+        # Récupérer le csv pour le dernier run pour s'assurer des données complètes et correctes
+        with open(LAST_ACTIVE_RUN, "w") as f:
+            f.write(str(r))
 
-    for g in range(game_idx, len(games)):
-        game = games[f'game{g+1}']
-        matrix = np.array(game['matrix'])
-        n_actions = len(matrix[0])
-        matrices = generate_n_player_diag(player, n_actions, matrix) if is_diagonal(matrix) else generate_n_player(
-            player, n_actions, matrix)
-        Execute(runs, horizon, player, [None] * player, game['name'], n_actions).get_one_game_result(
-            matrices, game['algos'], ctx, g, 'normal', game['noise'][0])
-        ctx.reset_after_game()
+        # logique pour soit une nouvelle expérience soit une extension d'une expérience
+        pkl_file = Path(folder) / "pkl" / f"cp_run{r}.pkl"
+        csv_file = Path(folder) / "output" / f"run{r}.csv"
+
+        completed_iterations = int(get_csv_line_count(csv_file)/len(games)) if csv_file.exists() else 0
+        if completed_iterations >= horizon:
+            continue
+
+        if pkl_file.exists():
+            with open(pkl_file, "rb") as f:
+                state = pickle.load(f)
+            start_iter = completed_iterations
+            env_state_list = [Environnement.from_serialized(env_state) for env_state in state['env_state']]
+            all_games_metrics_for_run = state['metrics']
+        else:
+            start_iter = 0
+            env_state_list = [None] * len(games)
+            all_games_metrics_for_run = []
+
+        env_list = []
+        for g in range(len(games)):
+            game = games[f'game{g + 1}']
+            matrix = np.array(game['matrix'])
+            n_actions = len(matrix[0])
+            matrices = generate_n_player_diag(player, n_actions, matrix) if is_diagonal(matrix) else generate_n_player(
+                player, n_actions, matrix)
+
+            matrices_norm = [normalizeMatrix(mat, 0) for mat in matrices]
+
+            regrets, rewards, plays, exploration_list, title, env = (
+                Execute(runs, horizon, player, [None] * player, game['name'], n_actions).run_one_game(start_iter, env_state_list[g], matrices_norm, game['algos'], 'normal', game['noise'][0]))
+            env_list.append(env)
+            for agent_id in range(player):
+                metrics_dict = {
+                    "play_time": plays[agent_id].tolist(),
+                    "reward_time": rewards[agent_id].tolist(),
+                    "regret_time": regrets[agent_id].tolist(),
+                    "exploration_time": exploration_list[agent_id].tolist(),
+                }
+
+                index = player * g + agent_id
+                if len(all_games_metrics_for_run) < (len(games) * player):
+                    flattened = flatten_metrics(
+                        title=title,
+                        player=f"agent_{agent_id}",
+                        instance=r,
+                        n_actions=n_actions,
+                        start=start_iter,
+                        metrics_dict=metrics_dict
+                    )
+                    all_games_metrics_for_run.append(flattened)
+                else:
+                    for key, val in metrics_dict.items():
+                        for t, value in enumerate(val):
+                            all_games_metrics_for_run[index][f"{key}{t + start_iter}"] = value
+
+        save_pickle(folder, r, all_games_metrics_for_run, env_list)
+        aggregate_metrics_from_single_pkl(f"{folder}/pkl/cp_run{r}.pkl")
+    if LAST_ACTIVE_RUN.exists():
+        LAST_ACTIVE_RUN.unlink()

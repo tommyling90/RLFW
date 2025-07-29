@@ -1,24 +1,43 @@
 import numpy as np
 import pandas as pd
+import os
+import re
 
-def runStats(file_path, game):
-    df = pd.read_csv(file_path)
-    n_actions = np.unique(df['n_actions'].to_numpy())[0]
-    df_game = df[df['title'] == game]
-    grouped = df_game.groupby(['title', 'instance'])
+def runStats(folder_path, game, n_actions):
+    metrics_base = ['play', 'reward', 'regret', 'exploration']
+    collected = {m: [] for m in metrics_base}
+    run_ids = []
+    for fname in sorted(os.listdir(folder_path)):
+        if fname.endswith(".csv"):
+            match = re.search(r"run(\d+)", fname)
+            run_ids.append(int(match.group(1)))
 
-    metrics = ['play_time', 'regret_time', 'reward_time', 'exploration_time']
-    collected = {key: [] for key in metrics}
+            df = pd.read_csv(os.path.join(folder_path, fname))
+            df_game = df[df['title'] == game]
+            df_game = df_game.sort_values(by="time_step").reset_index(drop=True)
+            if df_game.empty:
+                continue
 
-    for _, group in grouped:
-        for key in metrics:
-            data = group.filter(like=key, axis=1)
-            collected[key].append(data)
-    stacked = {key: np.stack(collected[key]) for key in metrics}
-    plays_arr = stacked["play_time"]
-    rewards_arr = stacked["reward_time"]
-    regrets_arr = stacked["regret_time"]
-    explorations_arr = stacked["exploration_time"]
+            agent_cols_by_metric = {
+                metric: [col for col in df.columns if col.startswith(f"{metric}_agent_")]
+                for metric in metrics_base
+            }
+
+            for metric, cols in agent_cols_by_metric.items():
+                values = df_game[cols].to_numpy().T  # shape: (n_agents, n_time_steps)
+                collected[metric].append(values)
+    if not any(collected.values()):
+        raise ValueError(f"No data found for game: {game}")
+
+    stacked = {
+        metric: np.stack(collected[metric])
+        for metric in metrics_base
+    }
+
+    plays_arr = stacked["play"]
+    rewards_arr = stacked["reward"]
+    regrets_arr = stacked["regret"]
+    explorations_arr = stacked["exploration"]
     cum_regrets_arr = regrets_arr.cumsum(axis=2)
 
     n_ins, n_agents, n_time = plays_arr.shape
@@ -47,12 +66,12 @@ def runStats(file_path, game):
             for i in range(n_agents)
         }
 
-    '''Calculer la proportion ci-bas'''
-    base = np.array([n_actions**p for p in reversed(range(n_agents))])
-    actions = np.moveaxis(plays_arr, 1, -1)
+    # Calculate joint action frequencies
+    base = np.array([n_actions ** p for p in reversed(range(n_agents))])
+    actions = np.moveaxis(plays_arr, 1, -1)  # (n_ins, n_time, n_agents)
     paire_action = np.tensordot(actions, base, axes=([2], [0])) + 1
     paire_action = paire_action.astype(int)
-    ids = np.array([i for i in range(n_actions**n_agents)]) + 1
+    ids = np.arange(1, n_actions ** n_agents + 1)
     vecteur_de_props = np.zeros((paire_action.shape[1], ids.size), dtype=float)
 
     for j in range(n_ins):
@@ -63,4 +82,4 @@ def runStats(file_path, game):
     vecteur_de_props /= n_ins
     stats["metrics"]["vecteur_de_props"] = vecteur_de_props
 
-    return stats
+    return stats, f"run{max(run_ids)}"
