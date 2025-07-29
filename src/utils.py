@@ -5,7 +5,7 @@ import re
 import pandas as pd
 from collections import defaultdict
 
-def flatten_metrics(title, player, instance, n_actions,metrics_dict):
+def flatten_metrics(title, player, instance, n_actions, start, metrics_dict):
     row = {
         "title": title,
         "player": player,
@@ -15,7 +15,7 @@ def flatten_metrics(title, player, instance, n_actions,metrics_dict):
 
     for key, val in metrics_dict.items():
         for t, value in enumerate(val):
-            row[f"{key}{t}"] = value
+            row[f"{key}{t + start}"] = value
     return row
 
 def sort_metric_columns(df):
@@ -62,11 +62,13 @@ def save_pickle_atomic(path, obj):
         pickle.dump(obj, f)
     os.replace(tmp_path, path)
 
-def save_pickle(folder, r, all_games_metrics_for_run):
+def save_pickle(folder, r, all_games_metrics_for_run, env_list):
+    env_list_ser = [env.serialize() for env in env_list]
     cp = {
         'run_idx': r+1,
         'metrics': all_games_metrics_for_run,
         'rng_state': np.random.get_state(),
+        'env_state': env_list_ser
     }
     pkl_file = f"{folder}/pkl/cp_run{r}.pkl"
     os.makedirs(os.path.dirname(pkl_file), exist_ok=True)
@@ -113,9 +115,9 @@ def aggregate_metrics_from_single_pkl(file_path):
     df.to_csv(output_path, index=False)
     print(f"📄 Saved clean tall-wide CSV: {output_path}")
 
-def recover_last_csv(pkl_folder):
-    latest_pkl_path = find_latest_checkpoint(pkl_folder)
-    aggregate_metrics_from_single_pkl(latest_pkl_path)
+def recover_last_csv(folder, last_run_id):
+    pkl_path = os.path.join(folder, f'cp_run{last_run_id}.pkl')
+    aggregate_metrics_from_single_pkl(pkl_path)
 
 def generate_n_player_PD(n, reward_matrix):
     # 2 pcq trahir vs trahir pas
@@ -187,3 +189,7 @@ def parse_string(s):
     noise = parts[2]
     game = '_'.join(parts[3:])
     return algos, noise, game
+
+def get_csv_line_count(csv_file):
+    with open(csv_file, "r") as f:
+        return sum(1 for _ in f) - 1

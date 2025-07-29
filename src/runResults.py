@@ -4,8 +4,17 @@ from pathlib import Path
 
 from src.execute import Execute
 from src.utils import *
+from src.environment import Environnement
 
 root = Path(__file__).resolve().parent.parent
+LAST_ACTIVE_RUN = Path("last_active_run.txt")
+
+def get_last_active_run():
+    try:
+        with open("last_active_run.txt", "r") as f:
+            return int(f.read().strip()) - 1
+    except FileNotFoundError:
+        return None
 
 def open_config(config_path):
     with open(config_path, "r") as f:
@@ -51,17 +60,43 @@ def run_results():
     if latest_file:
         with open(latest_file, "rb") as f:
             cp = pickle.load(f)
-        run_idx = cp['run_idx']
         rng_state = cp['rng_state']
-        recover_last_csv(f"{folder}/pkl/")
-    else:
-        run_idx = 0
 
     np.random.set_state(rng_state) if rng_state is not None else np.random.seed(seed)
 
-    for r in range(run_idx, runs):
-        all_games_metrics_for_run = []
-        for g in range(0, len(games)):
+    last_run_id = get_last_active_run()
+    if last_run_id is not None:
+        print(f"Regenerating CSV for run {last_run_id} before resuming...")
+        recover_last_csv(f"{folder}/pkl/", last_run_id)
+    else:
+        print("No previous run to recover.")
+
+    for r in range(runs):
+        # Récupérer le csv pour le dernier run pour s'assurer des données complètes et correctes
+        with open(LAST_ACTIVE_RUN, "w") as f:
+            f.write(str(r))
+
+        # logique pour soit une nouvelle expérience soit une extension d'une expérience
+        pkl_file = Path(folder) / "pkl" / f"cp_run{r}.pkl"
+        csv_file = Path(folder) / "output" / f"run{r}.csv"
+
+        completed_iterations = int(get_csv_line_count(csv_file)/len(games)) if csv_file.exists() else 0
+        if completed_iterations >= horizon:
+            continue
+
+        if pkl_file.exists():
+            with open(pkl_file, "rb") as f:
+                state = pickle.load(f)
+            start_iter = completed_iterations
+            env_state_list = [Environnement.from_serialized(env_state) for env_state in state['env_state']]
+            all_games_metrics_for_run = state['metrics']
+        else:
+            start_iter = 0
+            env_state_list = [None] * len(games)
+            all_games_metrics_for_run = []
+
+        env_list = []
+        for g in range(len(games)):
             game = games[f'game{g + 1}']
             matrix = np.array(game['matrix'])
             n_actions = len(matrix[0])
@@ -70,9 +105,9 @@ def run_results():
 
             matrices_norm = [normalizeMatrix(mat, 0) for mat in matrices]
 
-            regrets, rewards, plays, exploration_list, title = (
-                Execute(runs, horizon, player, [None] * player, game['name'], n_actions).run_one_game(matrices_norm, game['algos'], 'normal', game['noise'][0]))
-
+            regrets, rewards, plays, exploration_list, title, env = (
+                Execute(runs, horizon, player, [None] * player, game['name'], n_actions).run_one_game(start_iter, env_state_list[g], matrices_norm, game['algos'], 'normal', game['noise'][0]))
+            env_list.append(env)
             for agent_id in range(player):
                 metrics_dict = {
                     "play_time": plays[agent_id].tolist(),
@@ -80,13 +115,24 @@ def run_results():
                     "regret_time": regrets[agent_id].tolist(),
                     "exploration_time": exploration_list[agent_id].tolist(),
                 }
-                all_games_metrics_for_run.append(flatten_metrics(
-                    title=title,
-                    player=f"agent_{agent_id}",
-                    instance=r,
-                    n_actions=n_actions,
-                    metrics_dict=metrics_dict
-                ))
 
-        save_pickle(folder, r, all_games_metrics_for_run)
+                index = player * g + agent_id
+                if len(all_games_metrics_for_run) < (len(games) * player):
+                    flattened = flatten_metrics(
+                        title=title,
+                        player=f"agent_{agent_id}",
+                        instance=r,
+                        n_actions=n_actions,
+                        start=start_iter,
+                        metrics_dict=metrics_dict
+                    )
+                    all_games_metrics_for_run.append(flattened)
+                else:
+                    for key, val in metrics_dict.items():
+                        for t, value in enumerate(val):
+                            all_games_metrics_for_run[index][f"{key}{t + start_iter}"] = value
+
+        save_pickle(folder, r, all_games_metrics_for_run, env_list)
         aggregate_metrics_from_single_pkl(f"{folder}/pkl/cp_run{r}.pkl")
+    if LAST_ACTIVE_RUN.exists():
+        LAST_ACTIVE_RUN.unlink()

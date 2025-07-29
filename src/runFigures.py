@@ -10,7 +10,7 @@ from src.runStats import runStats
 sns.set_theme(style="whitegrid", palette="colorblind")
 sns.despine(trim=True)
 
-def plot_results(games, save_folder, compare):
+def plot_results(games, save_folder, compare, suffix):
     plt.figure(figsize=(5, 3))
     for game in games:
         title = game['experiment']
@@ -49,10 +49,10 @@ def plot_results(games, save_folder, compare):
     legend.get_frame().set_facecolor('white')
     plt.tight_layout()
     fileN = f"{game}_{noise}" if compare == 'algos' else f"{game}_compare_noise{algos}"
-    plt.savefig(f"{save_folder}/{fileN}.pdf", dpi=300)
+    plt.savefig(f"{save_folder}/{fileN}{suffix}.pdf", dpi=300)
     plt.close()
 
-def plot_action_prop(games, save_folder):
+def plot_action_prop(games, save_folder, suffix):
     plt.figure(figsize=(5, 3))
     for game in games:
         title = game['experiment']
@@ -88,7 +88,7 @@ def plot_action_prop(games, save_folder):
         frameon=False
     )
     plt.tight_layout()
-    plt.savefig(f"{save_folder}/{game}_{algos}_{noise}.pdf", dpi=300)
+    plt.savefig(f"{save_folder}/{game}_{algos}_{noise}{suffix}.pdf", dpi=300)
     plt.close()
 
 plt.rcParams.update({
@@ -104,7 +104,7 @@ plt.rcParams.update({
     "legend.fontsize": 8
 })
 
-def generate_fig(cumul_y, algos, noise, name, n_actions, folder):
+def generate_fig(cumul_y, algos, noise, name, n_actions, folder, suffix):
     games, games_result = [], []
     for algo in algos:
         for n in noise:
@@ -116,6 +116,6 @@ def generate_fig(cumul_y, algos, noise, name, n_actions, folder):
     newDir = f"{folder}/{cumul_y}/{subDir}"
     os.makedirs(newDir, exist_ok=True)
     if cumul_y == 'regret':
-        plot_results(games_result, newDir, 'algos' if len(algos) > 1 else 'noise')
+        plot_results(games_result, newDir, 'algos' if len(algos) > 1 else 'noise', suffix)
     elif cumul_y == 'prop':
-        plot_action_prop(games_result, newDir)
+        plot_action_prop(games_result, newDir, suffix)

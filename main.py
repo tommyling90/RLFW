@@ -2,8 +2,9 @@ import argparse
 
 from src.runResults import *
 from src.runFigures import *
+from src.utils import get_csv_line_count
 
-def generate_figures():
+def generate_figures(suffix):
     with open("graph_config.yaml", "r") as f:
         fig_config = yaml.safe_load(f)
     fig_defaults = fig_config['defaults']
@@ -14,7 +15,7 @@ def generate_figures():
         if len(val['algos']) > 1 and len(val['noise']) > 1 :
             raise "Too many pairs to compare. Either compare different algo combos on one noise level or different noise levels on one algo combo."
         cumul_y = val['cumul_y']
-        generate_fig(cumul_y, val['algos'], val['noise'], val['name'], fig_defaults['n_actions'], f"{fig_root}/{fig_defaults['graph_folder']}")
+        generate_fig(cumul_y, val['algos'], val['noise'], val['name'], fig_defaults['n_actions'], f"{fig_root}/{fig_defaults['graph_folder']}", suffix)
 
 def prune_pkls(pkl_folder):
     choice = input("⚠️ You're going to delete pkl files.\n"
@@ -76,13 +77,13 @@ def add(param, n):
 def add_horizon(n):
     with open('config.yaml', "r") as f:
         config = yaml.safe_load(f)
+    n_games = len(config['games'])
     folder = config['defaults']['save_folder']
     runs = config['defaults']['runs']
     horizon = config['defaults']['horizon']
     csv_files = list(Path(f'{folder}/output').glob("run*.csv"))
-    with open(f'{folder}/output/run{runs-1}.csv', "r") as f:
-        lines = sum(1 for _ in f) - 1
-    if Path(folder) / "output" / f"run{runs-1}.csv" not in csv_files or lines is not horizon:
+    lines = get_csv_line_count(f'{folder}/output/run{runs-1}.csv')
+    if Path(folder) / "output" / f"run{runs-1}.csv" not in csv_files or lines != horizon * n_games:
         print("‼️Experiment not complete. Can extend horizon only to a complete experiment.")
         return
     add('horizon', n)
@@ -98,9 +99,10 @@ def main():
     )
 
     # Command 2: generate_figures
-    subparsers.add_parser(
+    parser_graph = subparsers.add_parser(
         "generate_figures", help="Generate plots from a YAML figure config"
     )
+    parser_graph.add_argument("--suffix", required=False, default=None, help="Add suffix to figure name")
 
     # Command 3: prune_pkls
     parser_prune = subparsers.add_parser(
@@ -124,7 +126,7 @@ def main():
     if args.command == "run_results":
         run_results()
     elif args.command == "generate_figures":
-        generate_figures()
+        generate_figures(args.suffix)
     elif args.command == "prune_pkls":
         prune_pkls(args.path)
     elif args.command == "add_runs":

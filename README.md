@@ -29,9 +29,10 @@ pip install -r ./requirements.txt
 
 ### 🎮 CLI options
 1. `run_results` (no args; generate `.pkl` files. Can interrupt at any moment)
-2. `generate_figures` (no args; generate figures. Can run at any moment as long as `.csv` files are present)
+2. `generate_figures` (arg: --suffix, suffix to figure name; generate figures. Can run at any moment as long as `.csv` files are present. Generates figures only for experiments with completed horizon.)
 3. `prune_pkls` (arg: --path, need to give the relative path to the pkl folder containing `.pkl`s to delete; ⚠️deletes the `.pkl` files except for the last one. Use only when you are sure that you're not extending horizon in the future. Use when `.pkl` files or `pkl` folder get too large. Only the last `.pkl` is kept in order to resume)
 4. `add_runs` (arg: --n_runs, number of runs to add; adds more runs to the experiment in the `config.yaml` file)
+5. `add_horizon` (arg: --n_horizon, number of iterations to add; adds more iterations/horizon to the experiment in the `config.yaml` file)
 
 ## Documentation
 

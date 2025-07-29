@@ -14,21 +14,22 @@ class Execute:
         self.title = title
         self.n_actions = n_actions
 
-    def run_one_game(self, matrices, algo, noise_dist, noise_params):
-        env = Environnement(matrices, noise_dist, noise_params)
-        for agent in range(0, self.n_agents):
-            a_space = AgentSpace(self.n_actions)
-            learning_algo = LearningAlgo(self.const[agent], algo[agent], a_space, noise_params[1])
-            env.ajouter_agents(Agent(a_space, learning_algo))
+    def run_one_game(self, start_iter, env, matrices, algo, noise_dist, noise_params):
+        if env is None:
+            env = Environnement(matrices, noise_dist, noise_params)
+            for agent in range(0, self.n_agents):
+                a_space = AgentSpace(self.n_actions)
+                learning_algo = LearningAlgo(self.const[agent], algo[agent], a_space, noise_params[1])
+                env.ajouter_agents(Agent(a_space, learning_algo))
 
         title = f"{'×'.join(algo)}_{'_'.join(str(n) for n in noise_params)}_{self.title}"
 
         plays = np.zeros((self.n_agents, self.T))
         exploration_list = plays.copy()
-        for i in range(0, self.T):
+        for i in range(start_iter, self.T):
             actions, explorations = env.step()
             plays[:, i] = actions
             exploration_list[:, i] = explorations
-            regrets = np.array([env.agents[k].regret for k in range(self.n_agents)])
-            rewards = np.array([env.agents[k].reward for k in range(self.n_agents)])
-        return regrets, rewards, plays, exploration_list, title
+            regrets = np.array([agent.regret[start_iter:] for agent in env.agents])
+            rewards = np.array([agent.reward[start_iter:] for agent in env.agents])
+        return regrets, rewards, plays[:, start_iter:], exploration_list[:, start_iter:], title, env
