@@ -1,5 +1,5 @@
 # Reinforcement Learning Framework for Experiments with Agent Learning in Matrix Games
-Créé par: TCH Lin; github @tommyling90; tommyling79@gmail.com
+Created by: TCH Lin; github @tommyling90; tommyling79@gmail.com
 
 ## Overview
 
