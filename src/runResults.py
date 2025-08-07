@@ -53,17 +53,6 @@ def run_results():
     with open(f"{folder}/config.yaml", 'w') as f:
         yaml.dump(config, f)
 
-    rng_state = None
-
-    pkl_path = f"{folder}/pkl"
-    latest_file = find_latest_checkpoint(pkl_path)
-    if latest_file:
-        with open(latest_file, "rb") as f:
-            cp = pickle.load(f)
-        rng_state = cp['rng_state']
-
-    np.random.set_state(rng_state) if rng_state is not None else np.random.seed(seed)
-
     last_run_id = get_last_active_run()
     if last_run_id is not None:
         print(f"Regenerating CSV for run {last_run_id} before resuming...")
@@ -72,6 +61,7 @@ def run_results():
         print("No previous run to recover.")
 
     for r in range(runs):
+        set_rng_for_run(r, seed_base=seed, pkl_path=folder)
         # Récupérer le csv pour le dernier run pour s'assurer des données complètes et correctes
         with open(LAST_ACTIVE_RUN, "w") as f:
             f.write(str(r))
@@ -80,14 +70,19 @@ def run_results():
         pkl_file = Path(folder) / "pkl" / f"cp_run{r}.pkl"
         csv_file = Path(folder) / "output" / f"run{r}.csv"
 
-        completed_iterations = int(get_csv_line_count(csv_file)/len(games)) if csv_file.exists() else 0
-        if completed_iterations >= horizon:
+        lengths = get_pickle_len(pkl_file) if pkl_file.exists() else (0,0,0,0)
+        rew_len, reg_len, play_len, exp_len = lengths
+        csv_complete = is_csv_complete(csv_file, len(games), horizon)
+
+        if all(x >= horizon for x in lengths):
+            if not csv_complete:
+                aggregate_metrics_from_single_pkl(f"{folder}/pkl/cp_run{r}.pkl")
             continue
 
         if pkl_file.exists():
             with open(pkl_file, "rb") as f:
                 state = pickle.load(f)
-            start_iter = completed_iterations
+            start_iter = rew_len
             env_state_list = [Environnement.from_serialized(env_state) for env_state in state['env_state']]
             all_games_metrics_for_run = state['metrics']
         else:

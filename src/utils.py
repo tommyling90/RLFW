@@ -50,7 +50,6 @@ def find_latest_checkpoint(pkl_folder):
                 latest_cp = fname
 
     if latest_cp:
-        print(f"✅ Latest checkpoint: {latest_cp}")
         return os.path.join(pkl_folder, latest_cp)
     else:
         print("❌ No checkpoint found.")
@@ -118,6 +117,32 @@ def aggregate_metrics_from_single_pkl(file_path):
 def recover_last_csv(folder, last_run_id):
     pkl_path = os.path.join(folder, f'cp_run{last_run_id}.pkl')
     aggregate_metrics_from_single_pkl(pkl_path)
+
+def get_pickle_len(pkl_path):
+    with open(pkl_path, "rb") as f:
+        checkpoint = pickle.load(f)
+
+    sample_metrics = checkpoint['metrics'][0]
+    iter_reward = [k for k in sample_metrics.keys() if re.match(r"reward_time\d+$", k)]
+    iter_regret = [k for k in sample_metrics.keys() if re.match(r"regret_time\d+$", k)]
+    iter_play = [k for k in sample_metrics.keys() if re.match(r"play_time\d+$", k)]
+    iter_exp = [k for k in sample_metrics.keys() if re.match(r"exploration_time\d+$", k)]
+    return len(iter_reward), len(iter_regret), len(iter_play), len(iter_exp)
+
+def is_csv_complete(csv_file, num_games, expected_iterations):
+    if not csv_file.exists():
+        return False
+    actual_lines = get_csv_line_count(csv_file)
+    return actual_lines == num_games * expected_iterations
+
+def set_rng_for_run(run_id, seed_base, pkl_path):
+    run_pkl = f"{pkl_path}/pkl/cp_run{run_id}.pkl"
+    if os.path.exists(run_pkl):
+        with open(run_pkl, "rb") as f:
+            cp = pickle.load(f)
+        np.random.set_state(cp['rng_state'])
+    else:
+        np.random.seed(seed_base + run_id)
 
 def generate_n_player_PD(n, reward_matrix):
     # 2 pcq trahir vs trahir pas

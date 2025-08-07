@@ -1,5 +1,5 @@
 # Reinforcement Learning Framework for Experiments with Agent Learning in Matrix Games
-Created by: TCH Lin; github @tommyling90; tommyling79@gmail.com
+Created by TCH Lin; github @tommyling90; tommyling79@gmail.com
 
 ## Overview
 
@@ -27,6 +27,7 @@ pip install -r ./requirements.txt
 2. Use command line tools to run the experiments and print the results. See available commands below.
 3. User can interrupt the experiments at any moment. The results are saved in `pkl` files. When the user resumes, the experiment will pick up where it was left off.
 4. Notice that in `graph_config.yaml` user can specify a different folder than the folder in `config.yaml` to generate the figures from (hence, `generate_figures` is completely separate from `run_results`).
+5. Users can freely extend runs and horizon as per needed (but cannot extend them before the experiment is complete).
 
 ### 🎮 CLI options
 1. `run_results` (no args; generate `.pkl` files. Can interrupt at any moment)
