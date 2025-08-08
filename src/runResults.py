@@ -36,7 +36,7 @@ def run_results():
 
     if os.path.isdir(folder):
         choice = input("⚠️ Folder already exists.\n"
-               "If you're continuing an experiment that was interrupted or running more runs, press Y to continue.\n"
+               "If you're continuing an experiment that was interrupted or running more runs/horizon, press Y to continue.\n"
                "Otherwise press Q to quit and rename the folder in config.yaml.\n"
                "[Y/Q]").strip().upper()
         if choice == "Y":

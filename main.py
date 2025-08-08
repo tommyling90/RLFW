@@ -1,4 +1,4 @@
-import argparse
+import argparse, shutil
 
 from src.runResults import *
 from src.runFigures import *
@@ -19,38 +19,15 @@ def generate_figures(suffix):
 
 def prune_pkls(pkl_folder):
     choice = input("⚠️ You're going to delete pkl files.\n"
-                   "If you're certain that you won't need them anymore, for example, you won't be extending horizon, press Y to delete.\n"
+                   "If you're certain that the experiment is FINALIZED and that you WILL NOT be extending/resuming, press Y to delete.\n"
                    "Otherwise press Q to quit and rename the folder in config.yaml.\n"
                    "[Y/Q]").strip().upper()
     if choice == "Y":
         print("✅ Deleting...")
-
-        pkl_files = list(Path(pkl_folder).glob("cp_run*.pkl"))
-        if not pkl_files:
-            print("[Prune] Either wrong folder or pkl folder empty.")
-            return
-
-        run_indices = []
-        pattern = re.compile(r"cp_run(\d+)\.pkl")
-        for f in pkl_files:
-            match = pattern.match(f.name)
-            if match:
-                run_indices.append((int(match.group(1)), f))
-
-        if len(run_indices) <= 1:
-            print("[Prune] Must have the latest pkl file. Cannot delete.")
-            return
-
-        run_indices.sort()
-        *to_delete, last = run_indices
-        for _, f in to_delete:
-            try:
-                f.unlink()
-                print(f"[Prune] Deleted: {f}")
-            except Exception as e:
-                print(f"[Prune] Failed to delete: {e}")
-        print(f"[Prune] Kept latest: {last[1]}")
-
+        pkl_folder = Path(pkl_folder)
+        if pkl_folder.exists() and pkl_folder.is_dir():
+            shutil.rmtree(pkl_folder)
+        print(f"Deleted folder: {pkl_folder}")
     elif choice == "Q":
         print("❌ Exiting.")
         sys.exit(0)
