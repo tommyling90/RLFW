@@ -3,10 +3,16 @@ import pandas as pd
 import os
 import re
 
+def check_horizon_or_raise(horizon_by_file):
+    if len(set(horizon_by_file.values())) > 1:
+        raise RuntimeError("Mismatch in horizon - Experiment must be complete for horizon to generate figures.")
+
 def runStats(folder_path, game, n_actions):
     metrics_base = ['play', 'reward', 'regret', 'exploration']
     collected = {m: [] for m in metrics_base}
     run_ids = []
+    horizon_by_file = {}
+
     for fname in sorted(os.listdir(folder_path)):
         if fname.endswith(".csv"):
             match = re.search(r"run(\d+)", fname)
@@ -18,6 +24,7 @@ def runStats(folder_path, game, n_actions):
             if df_game.empty:
                 continue
 
+            horizon_by_file[fname] = int(df_game['time_step'].nunique())
             agent_cols_by_metric = {
                 metric: [col for col in df.columns if col.startswith(f"{metric}_agent_")]
                 for metric in metrics_base
@@ -28,6 +35,8 @@ def runStats(folder_path, game, n_actions):
                 collected[metric].append(values)
     if not any(collected.values()):
         raise ValueError(f"No data found for game: {game}")
+
+    check_horizon_or_raise(horizon_by_file)
 
     stacked = {
         metric: np.stack(collected[metric])

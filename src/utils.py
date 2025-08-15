@@ -50,7 +50,6 @@ def find_latest_checkpoint(pkl_folder):
                 latest_cp = fname
 
     if latest_cp:
-        print(f"✅ Latest checkpoint: {latest_cp}")
         return os.path.join(pkl_folder, latest_cp)
     else:
         print("❌ No checkpoint found.")
@@ -62,7 +61,7 @@ def save_pickle_atomic(path, obj):
         pickle.dump(obj, f)
     os.replace(tmp_path, path)
 
-def save_pickle(folder, r, all_games_metrics_for_run, env_list):
+def save_pickle(folder, r, all_games_metrics_for_run, env_list, suffix):
     env_list_ser = [env.serialize() for env in env_list]
     cp = {
         'run_idx': r+1,
@@ -70,7 +69,7 @@ def save_pickle(folder, r, all_games_metrics_for_run, env_list):
         'rng_state': np.random.get_state(),
         'env_state': env_list_ser
     }
-    pkl_file = f"{folder}/pkl/cp_run{r}.pkl"
+    pkl_file = f"{folder}/pkl/cp_run{r}{suffix}.pkl"
     os.makedirs(os.path.dirname(pkl_file), exist_ok=True)
     save_pickle_atomic(pkl_file, cp)
     print(f"📝 Saved checkpoint: run={r}")
@@ -118,6 +117,32 @@ def aggregate_metrics_from_single_pkl(file_path):
 def recover_last_csv(folder, last_run_id):
     pkl_path = os.path.join(folder, f'cp_run{last_run_id}.pkl')
     aggregate_metrics_from_single_pkl(pkl_path)
+
+def get_pickle_len(pkl_path):
+    with open(pkl_path, "rb") as f:
+        checkpoint = pickle.load(f)
+
+    sample_metrics = checkpoint['metrics'][0]
+    iter_reward = [k for k in sample_metrics.keys() if re.match(r"reward_time\d+$", k)]
+    iter_regret = [k for k in sample_metrics.keys() if re.match(r"regret_time\d+$", k)]
+    iter_play = [k for k in sample_metrics.keys() if re.match(r"play_time\d+$", k)]
+    iter_exp = [k for k in sample_metrics.keys() if re.match(r"exploration_time\d+$", k)]
+    return len(iter_reward), len(iter_regret), len(iter_play), len(iter_exp)
+
+def is_csv_complete(csv_file, num_games, expected_iterations):
+    if not csv_file.exists():
+        return False
+    actual_lines = get_csv_line_count(csv_file)
+    return actual_lines == num_games * expected_iterations
+
+def set_rng_for_run(run_id, seed_base, pkl_path):
+    run_pkl = f"{pkl_path}/pkl/cp_run{run_id}.pkl"
+    if os.path.exists(run_pkl):
+        with open(run_pkl, "rb") as f:
+            cp = pickle.load(f)
+        np.random.set_state(cp['rng_state'])
+    else:
+        np.random.seed(seed_base + run_id)
 
 def generate_n_player_PD(n, reward_matrix):
     # 2 pcq trahir vs trahir pas
