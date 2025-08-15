@@ -71,9 +71,10 @@ def main():
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
     # Command 1: run_results
-    subparsers.add_parser(
+    parser_run = subparsers.add_parser(
         "run_results", help="Run experiments based on a YAML config"
     )
+    parser_run.add_argument("--suffix_extend_games", required=False, default='', help="Add suffix when running extended games")
 
     # Command 2: generate_figures
     parser_graph = subparsers.add_parser(
@@ -101,7 +102,7 @@ def main():
 
     args = parser.parse_args()
     if args.command == "run_results":
-        run_results()
+        run_results(args.suffix_extend_games)
     elif args.command == "generate_figures":
         generate_figures(args.suffix)
     elif args.command == "prune_pkls":

@@ -61,7 +61,7 @@ def save_pickle_atomic(path, obj):
         pickle.dump(obj, f)
     os.replace(tmp_path, path)
 
-def save_pickle(folder, r, all_games_metrics_for_run, env_list):
+def save_pickle(folder, r, all_games_metrics_for_run, env_list, suffix):
     env_list_ser = [env.serialize() for env in env_list]
     cp = {
         'run_idx': r+1,
@@ -69,7 +69,7 @@ def save_pickle(folder, r, all_games_metrics_for_run, env_list):
         'rng_state': np.random.get_state(),
         'env_state': env_list_ser
     }
-    pkl_file = f"{folder}/pkl/cp_run{r}.pkl"
+    pkl_file = f"{folder}/pkl/cp_run{r}{suffix}.pkl"
     os.makedirs(os.path.dirname(pkl_file), exist_ok=True)
     save_pickle_atomic(pkl_file, cp)
     print(f"📝 Saved checkpoint: run={r}")

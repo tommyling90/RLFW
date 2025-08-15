@@ -30,13 +30,27 @@ def open_config(config_path):
     folder = f"{root}/{defaults['save_folder']}"
     return games, horizon, runs, player, seed, folder, config
 
-def run_results():
+def run_results(suffix):
     config_path = root / "config.yaml"
     games, horizon, runs, player, seed, folder, config = open_config(config_path)
+    last_run_csv = Path(f"../Figures/{folder}/output/run{runs-1}.csv")
+    manifest = Path(f"../Figures/{folder}/config.yaml")
+
+    extend_games = False
+
+    if manifest.exists() and last_run_csv.exists():
+        m_games, m_horizon, m_runs, m_player, m_seed, m_folder, m_config = open_config(manifest)
+        m_values = tuple(m_games.values())
+        filtered_v = [v for v in games.values() if v not in m_values]
+        if len(filtered_v) > 0:
+            if suffix == '':
+                raise RuntimeError('⚠️ Must give a suffix to csv when extending games!')
+            extend_games = True
+            games = {f"game{i}": v for i, v in enumerate(filtered_v, 1)}
 
     if os.path.isdir(folder):
         choice = input("⚠️ Folder already exists.\n"
-               "If you're continuing an experiment that was interrupted or running more runs/horizon, press Y to continue.\n"
+               "If you're continuing an experiment that was interrupted or running more runs/horizon/games, press Y to continue.\n"
                "Otherwise press Q to quit and rename the folder in config.yaml.\n"
                "[Y/Q]").strip().upper()
         if choice == "Y":
@@ -50,8 +64,17 @@ def run_results():
     else:
         os.makedirs(folder, exist_ok=True)
 
-    with open(f"{folder}/config.yaml", 'w') as f:
-        yaml.dump(config, f)
+    if extend_games:
+        next_idx = len(m_games) + 1
+        for v in games.values():
+            m_games[f"game{next_idx}"] = v
+            next_idx += 1
+        m_config['games'] = m_games
+        with open(manifest, "w") as f:
+            yaml.safe_dump(m_config, f, sort_keys=False, allow_unicode=True)
+    else:
+        with open(f"{folder}/config.yaml", 'w') as f:
+            yaml.safe_dump(config, f, sort_keys=False, allow_unicode=True)
 
     last_run_id = get_last_active_run()
     if last_run_id is not None:
@@ -67,8 +90,8 @@ def run_results():
             f.write(str(r))
 
         # logique pour soit une nouvelle expérience soit une extension d'une expérience
-        pkl_file = Path(folder) / "pkl" / f"cp_run{r}.pkl"
-        csv_file = Path(folder) / "output" / f"run{r}.csv"
+        pkl_file = Path(folder) / "pkl" / f"cp_run{r}{suffix}.pkl"
+        csv_file = Path(folder) / "output" / f"run{r}{suffix}.csv"
 
         lengths = get_pickle_len(pkl_file) if pkl_file.exists() else (0,0,0,0)
         rew_len, reg_len, play_len, exp_len = lengths
@@ -76,10 +99,10 @@ def run_results():
 
         if all(x >= horizon for x in lengths):
             if not csv_complete:
-                aggregate_metrics_from_single_pkl(f"{folder}/pkl/cp_run{r}.pkl")
+                aggregate_metrics_from_single_pkl(str(pkl_file))
             continue
-
-        if pkl_file.exists():
+        # étendre l'horizon
+        if pkl_file.exists() and not extend_games:
             with open(pkl_file, "rb") as f:
                 state = pickle.load(f)
             start_iter = rew_len
@@ -127,7 +150,7 @@ def run_results():
                         for t, value in enumerate(val):
                             all_games_metrics_for_run[index][f"{key}{t + start_iter}"] = value
 
-        save_pickle(folder, r, all_games_metrics_for_run, env_list)
-        aggregate_metrics_from_single_pkl(f"{folder}/pkl/cp_run{r}.pkl")
+        save_pickle(folder, r, all_games_metrics_for_run, env_list, suffix=suffix)
+        aggregate_metrics_from_single_pkl(str(pkl_file))
     if LAST_ACTIVE_RUN.exists():
         LAST_ACTIVE_RUN.unlink()
