@@ -116,10 +116,17 @@ def run_results(suffix):
         env_list = []
         for g in range(len(games)):
             game = games[f'game{g + 1}']
-            matrix = np.array(game['matrix'])
-            n_actions = len(matrix[0])
-            matrices = generate_n_player_diag(player, n_actions, matrix) if is_diagonal(matrix) else generate_n_player(
-                player, n_actions, matrix)
+            raw = game["matrix"]
+            arr = np.array(raw, dtype=float)
+
+            if arr.ndim == 2:
+                matrix = arr
+                n_actions = matrix.shape[1]
+                matrices = generate_n_player_diag(player, n_actions, matrix) if is_diagonal(matrix) else generate_n_player(
+                    player, n_actions, matrix)
+            elif arr.ndim == 3:
+                matrices = [np.array(m, dtype=float) for m in raw]
+                n_actions = matrices[0].shape[1]
 
             matrices_norm = [normalizeMatrix(mat, 0) for mat in matrices]
 

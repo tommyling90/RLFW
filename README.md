@@ -102,6 +102,12 @@ The user should also provide their own defined matrices for these games.
 
 The `noise` parameter should always follow this pattern: `[0.0, {noise_level_tested}]`
 
+The `matrix` parameter takes 2 forms:
+1. Symmetric payoff - enter a 2-D matrix: 
+`matrix: - [...,...] - [...,...]`
+2. Asymmetric payoff and customized payoff matrix - enter a 3-D matrix:
+`matrix: - [[...,...], [...,...]] - [[...,...], [...,...]]`
+
 Algorithms available are:
 - UCB
 - KLUCB
